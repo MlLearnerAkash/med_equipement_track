@@ -277,3 +277,11 @@ Yolov7-semantic & YOLOv7-panoptic & YOLOv7-caption
 * [https://github.com/TexasInstruments/edgeai-yolov5/tree/yolo-pose](https://github.com/TexasInstruments/edgeai-yolov5/tree/yolo-pose)
 
 </details>
+
+
+##Medical data train 
+
+```
+python train.py --workers 8 --device 'cpu' --batch-size 32 --data data/custom_coco.yaml --img 640 640 --cfg cfg/training/custom.yaml --weights 'yolov7_training.pt' --name yolov7-custom --hyp data/hyp.scratch.custom.yaml
+
+```
