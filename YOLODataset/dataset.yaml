@@ -1,0 +1,5 @@
+train: ./full_data_1000/YOLODataset/images/train/
+val: ./full_data_1000/YOLODataset/images/val/
+test: ./full_data_1000/YOLODataset/images/test/
+nc: 3
+names: ['clamp', 'golve', 'glove']
