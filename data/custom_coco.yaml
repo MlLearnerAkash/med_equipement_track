@@ -7,7 +7,7 @@ val: ./YOLODataset/images/val  # 5000 images
 # test: ./coco/test-dev2017.txt  # 20288 of 40670 images, submit to https://competitions.codalab.org/competitions/20794
 
 # number of classes
-nc: 3
+nc: 12
 
 # class names
-names: ['glove', 'clamp', 'golve']
+names: ['glove', 'snare', 'needle holder', 'needle', 'Gauze', 'neddle', 'gauze', 'incision', 'forceps', 'forecps', 'Incision', 'clamp']
