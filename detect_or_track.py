@@ -1,7 +1,6 @@
 import argparse
 import time
 from pathlib import Path
-
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
@@ -9,10 +8,41 @@ from numpy import random
 
 from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
-from utils.general import check_img_size, check_requirements, check_imshow, non_max_suppression, apply_classifier, \
-    scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
+from utils.general import check_img_size, check_requirements, \
+                check_imshow, non_max_suppression, apply_classifier, \
+                scale_coords, xyxy2xywh, strip_optimizer, set_logging, \
+                increment_path
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
+
+from sort import *
+
+
+"""Function to Draw Bounding boxes"""
+def draw_boxes(img, bbox, identities=None, categories=None, confidences = None, names=None, colors = None):
+    for i, box in enumerate(bbox):
+        x1, y1, x2, y2 = [int(i) for i in box]
+        tl = opt.thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
+
+        cat = int(categories[i]) if categories is not None else 0
+        id = int(identities[i]) if identities is not None else 0
+        # conf = confidences[i] if confidences is not None else 0
+
+        color = colors[cat]
+        
+        if not opt.nobbox:
+            cv2.rectangle(img, (x1, y1), (x2, y2), color, tl)
+
+        if not opt.nolabel:
+            label = str(id) + ":"+ names[cat] if identities is not None else  f'{names[cat]} {confidences[i]:.2f}'
+            tf = max(tl - 1, 1)  # font thickness
+            t_size = cv2.getTextSize(label, 0, fontScale=tl / 3, thickness=tf)[0]
+            c2 = x1 + t_size[0], y1 - t_size[1] - 3
+            cv2.rectangle(img, (x1, y1), c2, color, -1, cv2.LINE_AA)  # filled
+            cv2.putText(img, label, (x1, y1 - 2), 0, tl / 3, [225, 255, 255], thickness=tf, lineType=cv2.LINE_AA)
+
+
+    return img
 
 
 def detect(save_img=False):
@@ -20,10 +50,9 @@ def detect(save_img=False):
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
-
-    # Directories
     save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
-    (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
+    if not opt.nosave:  
+        (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
     # Initialize
     set_logging()
@@ -31,11 +60,7 @@ def detect(save_img=False):
     half = device.type != 'cpu'  # half precision only supported on CUDA
 
     # Load model
-    #NOTE:Akash Added
-    print("Weight file is>>>>", weights)
-
     model = attempt_load(weights, map_location=device)  # load FP32 model
-
     stride = int(model.stride.max())  # model stride
     imgsz = check_img_size(imgsz, s=stride)  # check img_size
 
@@ -71,6 +96,9 @@ def detect(save_img=False):
     old_img_b = 1
 
     t0 = time.time()
+    ###################################
+    startTime = 0
+    ###################################
     for path, img, im0s, vid_cap in dataset:
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -88,8 +116,7 @@ def detect(save_img=False):
 
         # Inference
         t1 = time_synchronized()
-        with torch.no_grad():   # Calculating gradients would cause a GPU memory leak
-            pred = model(img, augment=opt.augment)[0]
+        pred = model(img, augment=opt.augment)[0]
         t2 = time_synchronized()
 
         # Apply NMS
@@ -120,24 +147,65 @@ def detect(save_img=False):
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
-                # Write results
-                for *xyxy, conf, cls in reversed(det):
-                    if save_txt:  # Write to file
-                        xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                        line = (cls, *xywh, conf) if opt.save_conf else (cls, *xywh)  # label format
-                        with open(txt_path + '.txt', 'a') as f:
-                            f.write(('%g ' * len(line)).rstrip() % line + '\n')
+                dets_to_sort = np.empty((0,6))
+                # NOTE: We send in detected object class too
+                for x1,y1,x2,y2,conf,detclass in det.cpu().detach().numpy():
+                    dets_to_sort = np.vstack((dets_to_sort, 
+                                np.array([x1, y1, x2, y2, conf, detclass])))
 
-                    if save_img or view_img:  # Add bbox to image
-                        label = f'{names[int(cls)]} {conf:.2f}'
-                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
 
+                if opt.track:
+  
+                    tracked_dets = sort_tracker.update(dets_to_sort, opt.unique_track_color)
+                    tracks =sort_tracker.getTrackers()
+
+                    # draw boxes for visualization
+                    if len(tracked_dets)>0:
+                        bbox_xyxy = tracked_dets[:,:4]
+                        identities = tracked_dets[:, 8]
+                        categories = tracked_dets[:, 4]
+                        confidences = None
+
+                        if opt.show_track:
+                            #loop over tracks
+                            for t, track in enumerate(tracks):
+                  
+                                track_color = colors[int(track.detclass)] if not opt.unique_track_color else sort_tracker.color_list[t]
+
+                                [cv2.line(im0, (int(track.centroidarr[i][0]),
+                                                int(track.centroidarr[i][1])), 
+                                                (int(track.centroidarr[i+1][0]),
+                                                int(track.centroidarr[i+1][1])),
+                                                track_color, thickness=opt.thickness) 
+                                                for i,_ in  enumerate(track.centroidarr) 
+                                                    if i < len(track.centroidarr)-1 ] 
+                else:
+                    bbox_xyxy = dets_to_sort[:,:4]
+                    identities = None
+                    categories = dets_to_sort[:, 5]
+                    confidences = dets_to_sort[:, 4]
+                
+                im0 = draw_boxes(im0, bbox_xyxy, identities, categories, confidences, names, colors)
+
+                
+                    
+                
+                
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
             # Stream results
+            ######################################################
+            if dataset.mode != 'image' and opt.show_fps:
+                currentTime = time.time()
+
+                fps = 1/(currentTime - startTime)
+                startTime = currentTime
+                cv2.putText(im0, "FPS: " + str(int(fps)), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0,255,0),2)
+
+            #######################################################
             if view_img:
-                cv2.imshow(str(p), im0)
+                cv2.imshow(str(p), cv2.resize(im0, (1024, 526)))
                 cv2.waitKey(1)  # 1 millisecond
 
             # Save results (image with detections)
@@ -187,8 +255,25 @@ if __name__ == '__main__':
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
+
+    parser.add_argument('--track', action='store_true', help='run tracking')
+    parser.add_argument('--show-track', action='store_true', help='show tracked path')
+    parser.add_argument('--show-fps', action='store_true', help='show fps')
+    parser.add_argument('--thickness', type=int, default=2, help='bounding box and font size thickness')
+    parser.add_argument('--seed', type=int, default=1, help='random seed to control bbox colors')
+    parser.add_argument('--nobbox', action='store_true', help='don`t show bounding box')
+    parser.add_argument('--nolabel', action='store_true', help='don`t show label')
+    parser.add_argument('--unique-track-color', action='store_true', help='show each track in unique color')
+
+
     opt = parser.parse_args()
     print(opt)
+    np.random.seed(opt.seed)
+
+    sort_tracker = Sort(max_age=5,
+                       min_hits=2,
+                       iou_threshold=0.2) 
+
     #check_requirements(exclude=('pycocotools', 'thop'))
 
     with torch.no_grad():

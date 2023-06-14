@@ -1,0 +1,123 @@
+/home/depak/yolo_env38/lib/python3.8/site-packages/torch/distributed/launch.py:181: FutureWarning: The module torch.distributed.launch is deprecated
+and will be removed in future. Use torchrun.
+Note that --use-env is set by default in torchrun.
+If your script expects `--local-rank` argument to be set, please
+change it to read from `os.environ['LOCAL_RANK']` instead. See 
+https://pytorch.org/docs/stable/distributed.html#launch-utility for 
+further instructions
+
+  warnings.warn(
+WARNING:torch.distributed.run:
+*****************************************
+Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+*****************************************
+usage: train.py [-h] [--weights WEIGHTS] [--cfg CFG] [--data DATA] [--hyp HYP]
+                [--epochs EPOCHS] [--batch-size BATCH_SIZE]
+                [--img-size IMG_SIZE [IMG_SIZE ...]] [--rect]
+                [--resume [RESUME]] [--nosave] [--notest] [--noautoanchor]
+                [--evolve] [--bucket BUCKET] [--cache-images]
+                [--image-weights] [--device DEVICE] [--multi-scale]
+                [--single-cls] [--adam] [--sync-bn] [--local_rank LOCAL_RANK]
+                [--workers WORKERS] [--project PROJECT] [--entity ENTITY]
+                [--name NAME] [--exist-ok] [--quad] [--linear-lr]
+                [--label-smoothing LABEL_SMOOTHING] [--upload_dataset]
+                [--bbox_interval BBOX_INTERVAL] [--save_period SAVE_PERIOD]
+                [--artifact_alias ARTIFACT_ALIAS]
+                [--freeze FREEZE [FREEZE ...]] [--v5-metric]
+train.py: error: unrecognized arguments: --local-rank=3
+usage: train.py [-h] [--weights WEIGHTS] [--cfg CFG] [--data DATA] [--hyp HYP]
+                [--epochs EPOCHS] [--batch-size BATCH_SIZE]
+                [--img-size IMG_SIZE [IMG_SIZE ...]] [--rect]
+                [--resume [RESUME]] [--nosave] [--notest] [--noautoanchor]
+                [--evolve] [--bucket BUCKET] [--cache-images]
+                [--image-weights] [--device DEVICE] [--multi-scale]
+                [--single-cls] [--adam] [--sync-bn] [--local_rank LOCAL_RANK]
+                [--workers WORKERS] [--project PROJECT] [--entity ENTITY]
+                [--name NAME] [--exist-ok] [--quad] [--linear-lr]
+                [--label-smoothing LABEL_SMOOTHING] [--upload_dataset]
+                [--bbox_interval BBOX_INTERVAL] [--save_period SAVE_PERIOD]
+                [--artifact_alias ARTIFACT_ALIAS]
+                [--freeze FREEZE [FREEZE ...]] [--v5-metric]
+train.py: error: unrecognized arguments: --local-rank=1
+usage: train.py [-h] [--weights WEIGHTS] [--cfg CFG] [--data DATA] [--hyp HYP]
+                [--epochs EPOCHS] [--batch-size BATCH_SIZE]
+                [--img-size IMG_SIZE [IMG_SIZE ...]] [--rect]
+                [--resume [RESUME]] [--nosave] [--notest] [--noautoanchor]
+                [--evolve] [--bucket BUCKET] [--cache-images]
+                [--image-weights] [--device DEVICE] [--multi-scale]
+                [--single-cls] [--adam] [--sync-bn] [--local_rank LOCAL_RANK]
+                [--workers WORKERS] [--project PROJECT] [--entity ENTITY]
+                [--name NAME] [--exist-ok] [--quad] [--linear-lr]
+                [--label-smoothing LABEL_SMOOTHING] [--upload_dataset]
+                [--bbox_interval BBOX_INTERVAL] [--save_period SAVE_PERIOD]
+                [--artifact_alias ARTIFACT_ALIAS]
+                [--freeze FREEZE [FREEZE ...]] [--v5-metric]
+train.py: error: unrecognized arguments: --local-rank=2
+usage: train.py [-h] [--weights WEIGHTS] [--cfg CFG] [--data DATA] [--hyp HYP]
+                [--epochs EPOCHS] [--batch-size BATCH_SIZE]
+                [--img-size IMG_SIZE [IMG_SIZE ...]] [--rect]
+                [--resume [RESUME]] [--nosave] [--notest] [--noautoanchor]
+                [--evolve] [--bucket BUCKET] [--cache-images]
+                [--image-weights] [--device DEVICE] [--multi-scale]
+                [--single-cls] [--adam] [--sync-bn] [--local_rank LOCAL_RANK]
+                [--workers WORKERS] [--project PROJECT] [--entity ENTITY]
+                [--name NAME] [--exist-ok] [--quad] [--linear-lr]
+                [--label-smoothing LABEL_SMOOTHING] [--upload_dataset]
+                [--bbox_interval BBOX_INTERVAL] [--save_period SAVE_PERIOD]
+                [--artifact_alias ARTIFACT_ALIAS]
+                [--freeze FREEZE [FREEZE ...]] [--v5-metric]
+train.py: error: unrecognized arguments: --local-rank=0
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 2) local_rank: 0 (pid: 481581) of binary: /home/depak/yolo_env38/bin/python
+Traceback (most recent call last):
+  File "/usr/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/depak/yolo_env38/lib/python3.8/site-packages/torch/distributed/launch.py", line 196, in <module>
+    main()
+  File "/home/depak/yolo_env38/lib/python3.8/site-packages/torch/distributed/launch.py", line 192, in main
+    launch(args)
+  File "/home/depak/yolo_env38/lib/python3.8/site-packages/torch/distributed/launch.py", line 177, in launch
+    run(args)
+  File "/home/depak/yolo_env38/lib/python3.8/site-packages/torch/distributed/run.py", line 785, in run
+    elastic_launch(
+  File "/home/depak/yolo_env38/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/depak/yolo_env38/lib/python3.8/site-packages/torch/distributed/launcher/api.py", line 250, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2023-05-01_21:09:55
+  host      : binari-software-gpu
+  rank      : 1 (local_rank: 1)
+  exitcode  : 2 (pid: 481582)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2023-05-01_21:09:55
+  host      : binari-software-gpu
+  rank      : 2 (local_rank: 2)
+  exitcode  : 2 (pid: 481583)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2023-05-01_21:09:55
+  host      : binari-software-gpu
+  rank      : 3 (local_rank: 3)
+  exitcode  : 2 (pid: 481584)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2023-05-01_21:09:55
+  host      : binari-software-gpu
+  rank      : 0 (local_rank: 0)
+  exitcode  : 2 (pid: 481581)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

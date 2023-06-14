@@ -18,18 +18,22 @@ def gsutil_getsize(url=''):
 
 def attempt_download(file, repo='WongKinYiu/yolov7'):
     # Attempt file download if does not exist
+    ##NOTE: file is hard coded. rmove before starting
     file = Path(str(file).strip().replace("'", '').lower())
-
+    print("Hello>>>>>from google utils", file)
+    print(">>>>>", "/home/depak/Akash/med_equipement_track/runs/train/yolov7_epochs_res1824_date300523_4050img_aug_multiGPU4/weights")
     if not file.exists():
         try:
             response = requests.get(f'https://api.github.com/repos/{repo}/releases/latest').json()  # github api
             assets = [x['name'] for x in response['assets']]  # release assets
+            #NOTE:Akash added
+            
             tag = response['tag_name']  # i.e. 'v1.0'
         except:  # fallback plan
             assets = ['yolov7.pt', 'yolov7-tiny.pt', 'yolov7x.pt', 'yolov7-d6.pt', 'yolov7-e6.pt', 
                       'yolov7-e6e.pt', 'yolov7-w6.pt']
             tag = subprocess.check_output('git tag', shell=True).decode().split()[-1]
-
+            print("Hello from google utils")
         name = file.name
         if name in assets:
             msg = f'{file} missing, try downloading from https://github.com/{repo}/releases/'

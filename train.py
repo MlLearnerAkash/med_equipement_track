@@ -4,6 +4,7 @@ import math
 import os
 import random
 import time
+import datetime
 from copy import deepcopy
 from pathlib import Path
 from threading import Thread
@@ -36,6 +37,8 @@ from utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_di
 from utils.wandb_logging.wandb_utils import WandbLogger, check_wandb_resume
 
 logger = logging.getLogger(__name__)
+
+#NOTE:Akash Added
 
 
 def train(hyp, opt, device, tb_writer=None):
@@ -83,6 +86,7 @@ def train(hyp, opt, device, tb_writer=None):
     pretrained = weights.endswith('.pt')
     if pretrained:
         with torch_distributed_zero_first(rank):
+            print(">>>>>>weight path: ", weights)
             attempt_download(weights)  # download if not found locally
         ckpt = torch.load(weights, map_location=device)  # load checkpoint
         model = Model(opt.cfg or ckpt['model'].yaml, ch=3, nc=nc, anchors=hyp.get('anchors')).to(device)  # create
@@ -231,6 +235,17 @@ def train(hyp, opt, device, tb_writer=None):
     gs = max(int(model.stride.max()), 32)  # grid size (max stride)
     nl = model.model[-1].nl  # number of detection layers (used for scaling hyp['obj'])
     imgsz, imgsz_test = [check_img_size(x, gs) for x in opt.img_size]  # verify imgsz are gs-multiples
+
+    #NOTE:Akash Added
+#     # Initialize the distributed environment
+#     torch.distributed.init_process_group(
+#     backend='nccl',
+#     init_method='env://',
+#     rank=opt.local_rank
+# )
+
+#     # Set the device to the appropriate GPU
+#     torch.cuda.set_device(opt.local_rank)
 
     # DP mode
     if cuda and rank == -1 and torch.cuda.device_count() > 1:
@@ -526,6 +541,7 @@ def train(hyp, opt, device, tb_writer=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    # parser.add_argument('--local_rank', type=int, default=0, help='Alkash added for DP')
     parser.add_argument('--weights', type=str, default='yolo7.pt', help='initial weights path')
     parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
     parser.add_argument('--data', type=str, default='data/coco.yaml', help='data.yaml path')
@@ -547,7 +563,7 @@ if __name__ == '__main__':
     parser.add_argument('--single-cls', action='store_true', help='train multi-class data as single-class')
     parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
-    parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
+    parser.add_argument('--local-rank', type=int, default=0, help='DDP parameter, do not modify')
     parser.add_argument('--workers', type=int, default=8, help='maximum number of dataloader workers')
     parser.add_argument('--project', default='runs/train', help='save to project/name')
     parser.add_argument('--entity', default=None, help='W&B entity')
@@ -591,13 +607,24 @@ if __name__ == '__main__':
         opt.save_dir = increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok | opt.evolve)  # increment run
 
     # DDP mode
+    ##NOTE:Akash added
+
+    # This was resolved after increasing the timeout in train.py (line 596)
+
+    # dist.init_process_group(backend='nccl', init_method='env://', timeout=datetime.timedelta(seconds=5400))
+    # if not dist.is_initialized():
+    #     torch.distributed.init_process_group(
+    #         backend='nccl',
+    #         init_method='env://'
+    #     )
+
     opt.total_batch_size = opt.batch_size
     device = select_device(opt.device, batch_size=opt.batch_size)
     if opt.local_rank != -1:
         assert torch.cuda.device_count() > opt.local_rank
         torch.cuda.set_device(opt.local_rank)
         device = torch.device('cuda', opt.local_rank)
-        dist.init_process_group(backend='nccl', init_method='env://')  # distributed backend
+        dist.init_process_group(backend='nccl', init_method='env://', timeout=datetime.timedelta(seconds=3600))  # distributed backend
         assert opt.batch_size % opt.world_size == 0, '--batch-size must be multiple of CUDA device count'
         opt.batch_size = opt.total_batch_size // opt.world_size
 

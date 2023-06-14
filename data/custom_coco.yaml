@@ -2,12 +2,22 @@
 #@Date: 21/02/2023
 
 # train and val data as 1) directory: path/images/, 2) file: path/images.txt, or 3) list: [path1/images/, path2/images/]
-train: ./YOLODataset/images/train  # 118287 images
-val: ./YOLODataset/images/val  # 5000 images
-# test: ./coco/test-dev2017.txt  # 20288 of 40670 images, submit to https://competitions.codalab.org/competitions/20794
+train: /media/depak/HDD/shared/aug_data_29_05_23_img4050/YOLODataset/images/train
+#/home/depak/Akash/YOLODataset/images/train #/media/depak/BinariHDD/share/22-4-2023/YOLODataset/images/train  # 118287 images
+val: /media/depak/HDD/shared/aug_data_29_05_23_img4050/YOLODataset/images/val
+#/home/depak/Akash/YOLODataset/images/val #/media/depak/BinariHDD/share/22-4-2023/YOLODataset/images/val #../YOLODataset/images/val  # 5000 images
+# test: /media/depak/BinariHDD/share/YOLODataset/images/test  # 20288 of 40670 images, submit to https://competitions.codalab.org/competitions/20794
 
 # number of classes
-nc: 12
+nc: 11
 
 # class names
-names: ['glove', 'snare', 'needle holder', 'needle', 'Gauze', 'neddle', 'gauze', 'incision', 'forceps', 'forecps', 'Incision', 'clamp']
+names: ['glove', 'scalpel', 'clamp', 'woodspack', 'snare', 'incision', 'gauze', 'needle', 'needle holder', 'sponge', 'forceps']
+#['incision', 'clamp', 'needle', 'sponge', 'glove', 'forceps', 'scalpel', 'snare']
+#['incision', 'forceps', 'glove', 'clamp', 'snare', 'needle']
+#['incision', 'glove', 'woodspack', 'golve', 'snare', 'Incision', 'sponge', 'scalpel', 'force[s', 'forceps', 'clamp', 'needle', 'needle holder', 'gauze']
+#['needle holder', 'scalpel', 'Incision', 'golve', 'gauze', 'clamp', 'sponge', 'needle', 'snare', 'forceps', 'glove', 'incision']
+#['needle holder', 'scalpel', 'Incision', 'golve', 'gauze', 'clamp', 'sponge', 'needle', 'snare', 'forceps', 'glove', 'incision']
+#['glove', 'snare', 'needle holder', 'needle', 'Gauze', 'neddle', 'gauze', 'incision', 'forceps', 'forecps', 'Incision', 'clamp']
+
+#Unnecesessary: golve, Incision, force[s
