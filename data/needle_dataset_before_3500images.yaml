@@ -1,0 +1,5 @@
+train: /media/binarisoftware/HDD/shared/data_29_05_2023/needle_images/aug_needle/YOLODataset/images/train/
+val: /media/binarisoftware/HDD/shared/data_29_05_2023/needle_images/aug_needle/YOLODataset/images/val/
+test: /media/binarisoftware/HDD/shared/data_29_05_2023/needle_images/aug_needle/YOLODataset/images/test/
+nc: 11
+names: ['glove,', 'scalpel,', 'clamp,', 'woodspack,', 'snare,', 'incision,', 'gauze,', 'needle,', 'needle holder,', 'sponge,', 'forceps']
